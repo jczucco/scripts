@@ -17,6 +17,7 @@
 
 IPTABLES="/sbin/iptables"
 IP6TABLES="/sbin/ip6tables"
+SYSCTL="/sbin/sysctl"
 IFEXT="eth0"
 
 
@@ -45,6 +46,7 @@ case $1 in
 		    
         ;;
         *)
+	    echo "Starting iptables firewall... "
             ${IPTABLES} -P OUTPUT ACCEPT
             ${IPTABLES} -P INPUT DROP 
             ${IPTABLES} -P FORWARD DROP
@@ -66,28 +68,37 @@ case $1 in
             ${IP6TABLES} -t mangle -F
             ${IP6TABLES} -t mangle -X
 
+
 	    # Sysctl Controls:	
-            #filter ipspoofing
-	    echo 2 > /proc/sys/net/ipv4/conf/all/rp_filter
-            #stop responding to broadcast pings
-	    echo 1 > /proc/sys/net/ipv4/icmp_echo_ignore_broadcasts
-	    #block source routing
-	    echo 0 > /proc/sys/net/ipv4/conf/all/accept_source_route
-	    #kill timestamps
-	    echo 0 > /proc/sys/net/ipv4/tcp_timestamps
+
             #activate the syncookies
-	    echo 1 > /proc/sys/net/ipv4/tcp_syncookies
+	    ${SYSCTL} net.ipv4.tcp_syncookies=1
+	    #block source routing
+	    ${SYSCTL} net.ipv4.conf.all.accept_source_route=0
 	    #disable redirects in the machine
-	    echo 0 >/proc/sys/net/ipv4/conf/all/accept_redirects
+	    ${SYSCTL} net.ipv4.conf.all.accept_redirects=0
+            #filter ipspoofing
+	    ${SYSCTL} net.ipv4.conf.all.rp_filter=2
+            #stop responding to broadcast pings
+	    ${SYSCTL} net.ipv4.icmp_echo_ignore_broadcasts=1
 	    #enable bad error message protection
-	    echo 1 > /proc/sys/net/ipv4/icmp_ignore_bogus_error_responses
-	    #block dynamic ip addresses
-	    echo 0 > /proc/sys/net/ipv4/ip_dynaddr
+	    ${SYSCTL} net.ipv4.icmp_ignore_bogus_error_responses=1
 	    #log packets with strange addresses
-	    echo 1 > /proc/sys/net/ipv4/conf/all/log_martians
+	    ${SYSCTL} net.ipv4.conf.all.log_martians=1
+	    ${SYSCTL} net.ipv4.ip_local_port_range="1024 65000"
+	    #kill timestamps
+	    ${SYSCTL} net.ipv4.tcp_timestamps=0
+	    #block dynamic ip addresses
+	    ${SYSCTL} net.ipv4.ip_dynaddr=0
 
 	    # disable ipv6
-	    sysctl net.ipv6.conf.all.disable_ipv6=1
+	    ${SYSCTL} net.ipv6.conf.all.disable_ipv6=1
+
+	    # Seguranca
+	    ${SYSCTL} kernel.randomize_va_space=2
+	    # only in RHEL like:
+	    #${SYSCTL} kernel.exec-shield=1
+
 
 
 	    # Apesar de a política padrão ser DROP, bloqueia algumas coisas para evitar "barulho" nos logs:
@@ -126,6 +137,9 @@ case $1 in
 
 	    # LOG
 	    ${IPTABLES} -A INPUT -i ${IFEXT} -j LOG --log-level 4 --log-prefix "Firewall: "
+
+	    echo 
+	    echo "Iptables Firewall started!"
 
         ;;
 esac
