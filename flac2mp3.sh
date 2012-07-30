@@ -1,4 +1,6 @@
 #!/bin/bash
+#
+# Simple script to convert FLAC music files to mp3 format
 
 ls | while read ARQ; do
 
