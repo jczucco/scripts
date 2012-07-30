@@ -96,7 +96,7 @@ case $1 in
             #BCAST=$(ifconfig | grep Bcast | awk '{ print $4 }' | cut -d\: -f2)
             BCAST=$(/sbin/ip a | grep ${IFEXT} | grep brd | awk '{ print $4 }')
             ${IPTABLES} -A INPUT -d ${BCAST} -j DROP
-            # Bad incoming source ip address 224.0.0.0/3
+            # Bad incoming source ip address 224.0.0.0/3 - Multicast
             ${IPTABLES} -A INPUT -s 224.0.0.0/3 -j DROP
             ${IPTABLES} -A INPUT -d 224.0.0.0/3 -j DROP
             # Block Fragments
