@@ -11,8 +11,7 @@ echo "$(date) Inicio Backup Firebird"
 
 	# limpa diretorio de backup        
 	echo "Limpando diretorio de backup ${BACKUPDIR}"
-	cd ${BACKUPDIR}
-	rm *.gz
+	rm -f ${BACKUPDIR}/*.gz
 
         # backup das bases de dados
 	cd ${DATADIR}
