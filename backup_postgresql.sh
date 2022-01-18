@@ -46,7 +46,7 @@ select datname from pg_database where not datname in ('bacula','template0') orde
 EOF
 `
 do
- echo "Executando Backup do Database $dbname"
+ echo "$(date) - Executando Backup do Database $dbname"
  #${PGHOME}/bin/pg_dump -U ${USER} -h ${HOST} -p ${PGPORT} -w -s $dbname > ${DUMPDIR}/$dbname.schema.dump || exit 2
  ${PGHOME}/bin/pg_dump -U ${USER} -h ${HOST} -p ${PGPORT} -w -s $dbname | gzip > ${DUMPDIR}/$dbname.schema.dump.gz
  ESTADOCOMANDOS="${PIPESTATUS[@]}"
@@ -66,24 +66,24 @@ done
 
 
 echo
-echo "Fazenendo o backup via pg_basebackup"
+echo "$(date) - Fazendo o backup via pg_basebackup"
 ${PGHOME}/bin/pg_basebackup -U ${USER} -h ${HOST} -p ${PGPORT} -D ${PGBASEBACKUP}/ -v -X stream || exit 2
 
 echo
-echo "Removendo os archives antigos"
+echo "$(date) - Removendo os archives antigos"
 LASTARCHIVE=`ls -t ${PGARCHIVE}/*.backup | head -n 1 |awk -F"/" '{print $NF}'`
 ${PGHOME}/bin/pg_archivecleanup -d ${PGARCHIVE} ${LASTARCHIVE} || exit 2
 
  
 echo
-echo "Fazendo backup da configuração"
+echo "$(date) - Fazendo backup da configuração"
 tar cvfz ${DUMPDIR}/conf.tar.gz ${PGCONF}/ || exit 2
 
 chmod 400 ${DUMPDIR}/* || exit 2
 chown root.root ${DUMPDIR}/* || exit 2
 
 echo 
-echo "Executa vaccumdb na base de dados"
+echo "$(date) - Executa vaccumdb na base de dados"
 ${PGHOME}/bin/vacuumdb -U ${USER} -h ${HOST} -p ${PGPORT} -z -v -a || exit 2
 
 echo "$(date) FIM Backup PostgreSQL"
