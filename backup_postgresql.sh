@@ -1,7 +1,10 @@
 #!/bin/bash
 #
 # Backup Banco Postgresql - Baseado em http://wiki.bacula.org/doku.php?id=application_specific_backups:postgresql
-# by Zucco 05/08/2010
+# by Zucco 18/01/2022
+#
+# Testado em Debian 11 e Ubuntu 20.04
+#
 
 HOST="127.0.0.1"
 PGPORT="5432"
