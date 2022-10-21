@@ -30,7 +30,7 @@ dir %DUMPDIR%
 
 echo ======= %date% %time% pg_dumpall
 %PGHOME%\bin\pg_dumpall -U %USER% -h %HOST% -w -g >%DUMPDIR%\globalobjects.dump || goto :error_dumpall
-"%ZIPDIRPROGRAM%\7z" a -bso0 -bsp0 %DUMPDIR%\globalobjects.dump.7z %DUMPDIR%\globalobjects.dump || goto :error_7z_globobj
+%ZIPDIRPROGRAM%\7z a -bso0 -bsp0 %DUMPDIR%\globalobjects.dump.7z %DUMPDIR%\globalobjects.dump || goto :error_7z_globobj
 del %DUMPDIR%\globalobjects.dump
 
 %PGHOME%\bin\psql -U %USER% -h %HOST% -w -d template1 -q -t -c "select datname from pg_database where datname not in ('template0') order by datname;" >%BASES% || goto :error_getbases
@@ -40,10 +40,10 @@ for /F %%b in (%BASES%) do (
   echo ======= !date! !time! Backup da base : '%%b'
   setlocal DisableDelayedExpansion
   %PGHOME%\bin\pg_dump -U %USER% -h %HOST% -w -s %%b > %DUMPDIR%\%%b.schema.dump || goto :error_pgdump_schema
-  "%ZIPDIRPROGRAM%\7z" a -bso0 -bsp0 %DUMPDIR%\%%b.schema.dump.7z %DUMPDIR%\%%b.schema.dump || goto :error_7z_schema
+  %ZIPDIRPROGRAM%\7z a -bso0 -bsp0 %DUMPDIR%\%%b.schema.dump.7z %DUMPDIR%\%%b.schema.dump || goto :error_7z_schema
   del %DUMPDIR%\%%b.schema.dump
   %PGHOME%\bin\pg_dump -U %USER% -h %HOST% -w %%b > %DUMPDIR%\%%b.data.dump || goto :error_pgdump_data
-  "%ZIPDIRPROGRAM%\7z" a -bso0 -bsp0 %DUMPDIR%\%%b.data.dump.7z %DUMPDIR%\%%b.data.dump || goto :error_7z_data
+  %ZIPDIRPROGRAM%\7z a -bso0 -bsp0 %DUMPDIR%\%%b.data.dump.7z %DUMPDIR%\%%b.data.dump || goto :error_7z_data
   del %DUMPDIR%\%%b.data.dump
 )
 dir %DUMPDIR%
